@@ -1,7 +1,7 @@
-import sys
-import re
+import sys, re
 import matplotlib.pyplot as plt
 import matplotlib
+from prettytable import PrettyTable
 
 temp_iter_list = []
 temp_vel_list = []
@@ -16,6 +16,12 @@ velz_list = []
 omega_list = []
 epsilon_list = []
 k_list = []
+
+pt = PrettyTable()
+
+matplotlib.rcParams['text.usetex'] = True
+fig = plt.figure('Residuals')
+plt.grid(True)
 
 with open(sys.argv[1], 'r') as file:
     for line in file:
@@ -39,7 +45,8 @@ with open(sys.argv[1], 'r') as file:
             temp_k_list.append(re.findall(k_string,line))             
 
     iter_list = [float(x) for sublist in temp_iter_list for x in sublist]
-    
+    pt.add_column('Iteration', iter_list)
+
     for tuple in temp_vel_list:
         if tuple[0][0] == 'x':
             velx_list.append(float(tuple[0][1].split(',')[0]))
@@ -56,38 +63,27 @@ with open(sys.argv[1], 'r') as file:
     epsilon_list = [float(sublist[0].split(',')[0]) for sublist in temp_epsilon_list]
     k_list = [float(sublist[0].split(',')[0]) for sublist in temp_k_list]
 
-    #print(f"Iterations: {iter_list}", f"\nUx: {velx_list}", f"\nUy: {vely_list}", f"\nUz: {velz_list}", f"\nPressure: {p_list}", f"\nOmega: {omega_list}", f"\nEpsilon: {epsilon_list}", f"\nk: {k_list}")
-
-# Plot residuals
-
-#Change font type and font size in axis labels
-#matplotlib.rcParams.update({'legend.markerscale': 1.5, 'legend.handlelength': 1.5, 'legend.frameon': 1, 'legend.handletextpad': 1 , 'legend.framealpha': 1, 'font.size': 18,'font.family':'Times New Roman'})
-
-#matplotlib.rcParams['text.usetex'] = True
-#matplotlib.rcParams['text.latex.unicode'] = True
-#matplotlib.rcParams['mathtext.fontset'] = 'stix'
-#matplotlib.rcParams['font.family'] = 'STIXGeneral'
-
-# Plot residuals
-fig = plt.figure('Residuals')
-plt.grid(False)
-
-#Plot magU values
 if velx_list:
     plt.plot(iter_list, velx_list, '-', color='black', label=r'$\bar{u}_x$', linewidth=0.7)
+    pt.add_column('Velocity Ux', velx_list)
 if vely_list:
     plt.plot(iter_list, vely_list, '-', color='red', label=r'$\bar{u}_y$', linewidth=0.7)
+    pt.add_column('Velocity Uy', vely_list)
 if velz_list:
     plt.plot(iter_list, velz_list, '-', color='green', label=r'$\bar{u}_z$', linewidth=0.7)
-
-plt.plot(iter_list, p_list, '-', color='cyan', label=r'$p$', linewidth=0.7)
-
+    pt.add_column('Velocity Uz', velz_list)
+if p_list:
+    plt.plot(iter_list, p_list, '-', color='cyan', label=r'$p$', linewidth=0.7)
+    pt.add_column('Pressure p', p_list)
 if omega_list:
     plt.plot(iter_list, omega_list, '-', color='violet', label=r'$\omega$', linewidth=0.7)
+    pt.add_column('Spec. diss. rate omega', omega_list)
 else:
     plt.plot(iter_list, epsilon_list, '-', color='violet', label=r'$\varepsilon$', linewidth=0.7)
-
-plt.plot(iter_list, k_list, '-', color='orange', label=r'$k$', linewidth=0.7)
+    pt.add_column('Diss. rate epsilon', epsilon_list)
+if k_list:
+    plt.plot(iter_list, k_list, '-', color='orange', label=r'$k$', linewidth=0.7)
+    pt.add_column('Turb. kin. energy', k_list)
 
 plt.xlabel(r'Iteration')#, fontsize=24)
 plt.ylabel(r'Residual')#, fontsize=24)
@@ -104,10 +100,11 @@ frame = legend.get_frame()
 frame.set_facecolor('#ecf0f1')
 frame.set_linewidth(0)
 
+if len(sys.argv) > 2:
+    for arg in sys.argv:
+        if arg == '--print-residual-values':
+            print(pt)
+        if arg == '-h':
+            print('\nDescription\n\n-h\tHelp.\n--print-residual-values\tPlot residual values in the form of table.\n')
+
 plt.show()
-
-#Set figure size
-#fig.set_size_inches(12, 8)
-
-#When saving, specify the DPI
-#plt.savefig('residuals.pdf', dpi = 250, bbox_inches='tight')
