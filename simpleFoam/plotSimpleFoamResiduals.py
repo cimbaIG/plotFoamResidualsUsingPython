@@ -19,9 +19,9 @@ k_list = []
 
 pt = PrettyTable()
 
-matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['axes.autolimit_mode'] = 'round_numbers'
 fig = plt.figure('Residuals')
-plt.grid(True)
+plt.grid(True, linestyle=':', color='black', alpha=0.3)
 
 with open(sys.argv[1], 'r') as file:
     for line in file:
@@ -85,16 +85,18 @@ if k_list:
     plt.plot(iter_list, k_list, '-', color='orange', label=r'$k$', linewidth=0.7)
     pt.add_column('Turb. kin. energy', k_list)
 
-plt.xlabel(r'Iteration')#, fontsize=24)
-plt.ylabel(r'Residual')#, fontsize=24)
-plt.yscale("log")  
-plt.xlim([0, len(iter_list)])
-#plt.ylim([1e-10, 1])
-#starty, endy = (1e-10, 1.01)
-#startx, endx = (0, len(iter_list) + 0.01)
-#plt.yticks(np.arange(starty,endy,1e-1))
-#plt.xticks(np.arange(startx,endx,300))
-#legend = plt.legend(numpoints=1, loc=0)
+plt.xlabel(r'Iteration')
+plt.ylabel(r'Residual')
+ax = plt.gca()
+ax.set_yscale("log")
+ax.set_xlim(xmin=0,xmax=None)
+
+ax.set_ylim(ymax=1,ymin=None)
+y_major = matplotlib.ticker.LogLocator(base = 10.0, numticks = 15)
+ax.yaxis.set_major_locator(y_major)
+y_minor = matplotlib.ticker.LogLocator(base = 10.0, subs = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9], numticks = 12)
+ax.yaxis.set_minor_locator(y_minor)
+
 legend = plt.legend(ncol=2)
 frame = legend.get_frame()
 frame.set_facecolor('#ecf0f1')
@@ -102,9 +104,9 @@ frame.set_linewidth(0)
 
 if len(sys.argv) > 2:
     for arg in sys.argv:
-        if arg == '--print-residual-values':
-            print(pt)
         if arg == '-h':
             print('\nDescription\n\n-h\tHelp.\n--print-residual-values\tPlot residual values in the form of table.\n')
+        if arg == '--print-residual-values':
+            print(pt)
 
 plt.show()
