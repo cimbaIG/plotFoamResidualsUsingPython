@@ -105,8 +105,13 @@ frame.set_linewidth(0)
 if len(sys.argv) > 2:
     for arg in sys.argv:
         if arg == '-h':
-            print('\nDescription\n\n-h\tHelp.\n--print-residual-values\tPlot residual values in the form of table.\n')
+            print('\nDescription\n\n-h\t\t\t\tHelp.\n--print-residual-values\t\tPlot residual values in the form of table.\n--print-residual-values-to-file\tPlot residual values to the file residuals.dat.\n')
         if arg == '--print-residual-values':
             print(pt)
+        if arg == '--print-residual-values-to-file':
+            from contextlib import redirect_stdout
+            with open('residuals.dat', 'w') as f:
+                with redirect_stdout(f):
+                    print(pt)
 
 plt.show()
